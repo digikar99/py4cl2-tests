@@ -904,7 +904,6 @@ class Foo():
     import time
     import sys
     sys.stdout.write('hello')
-    sys.stdout.flush()
     time.sleep(5)
     return")
     (assert-equalp "hello"

@@ -60,7 +60,8 @@
       (py4cl2:pystart "python -c \"quit()\"")))
 
 (deftest error-on-eof (process-basic) nil
-  (assert-condition py4cl2:python-eof-and-dead (py4cl2:pyexec "quit(0)")))
+  (dotimes (i 5)
+    (assert-condition py4cl2:python-eof-and-dead (py4cl2:pyexec "quit(0)"))))
 
 ;; ======================== CALLPYTHON-RAW =====================================
 

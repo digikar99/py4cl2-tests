@@ -573,11 +573,11 @@ class testclass:
     ()
     ((py4cl2:defpyfun "sum" "" :lisp-fun-name "PYSUM")
      (py4cl2:defpyfun "Fraction" "fractions")
-     (py4cl2:defpyfun "gcd" "fractions" :as "g"))
+     (py4cl2:defpyfun "gcd" "math" :as "g"))
   (py4cl2:pystop) ; taking "safety" into account
   (assert-equalp 1/2 (fraction :numerator 1 :denominator 2))
   (py4cl2:pystop) ; taking "safety" into account
-  (assert-equalp 1 (g :a 5 :b 6))
+  (assert-equalp 1 (g 5 6))
   (assert-equalp 1 (py4cl2:pycall "g" 5 6)) ; not safe!
   (py4cl2:pystop) ; taking "safety" into account
   (assert-equalp 6 (pysum '(2 1 3))))
@@ -904,6 +904,7 @@ class Foo():
     import time
     import sys
     sys.stdout.write('hello')
+    sys.stdout.flush()
     time.sleep(5)
     return")
     (assert-equalp "hello"
@@ -917,6 +918,7 @@ class Foo():
           (py4cl2:pyinterrupt)
           (bt:join-thread mon-thread)
           rv))
+    (assert-true (py4cl2:python-alive-p))
     (assert-equalp "hello"
         (let* ((rv nil)
                (mon-thread (bt:make-thread
@@ -929,7 +931,7 @@ class Foo():
           (py4cl2:pyinterrupt)
           (bt:join-thread mon-thread)
           rv)))
-
+  (assert-true (py4cl2:python-alive-p))
   ;; Check if no "residue" left
 
   (assert-equalp 5 (py4cl2:pyeval 5)))

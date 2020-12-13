@@ -9,6 +9,8 @@ For running the tests, ensure you use python3 (by configuring `(py4cl2:config-va
 - numpy
 - networkx
 
-The system is configured (in [package.lisp](package.lisp)) to avoid testing the loading of networkx on ECL. To overcome this behavior, simply remove `:ecl` from `cl:*features*` during system-read time.
+The system is configured (in [package.lisp](package.lisp)) to avoid testing the loading of networkx on ECL and ABCL.
+
+To overcome this behavior, simply remove `:ecl` or `:abcl` from `cl:*features*` during system-read time.
 
 Once these are loaded, run `(asdf:test-system "py4cl2-tests")`.

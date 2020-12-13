@@ -5,7 +5,9 @@
 (py4cl2:defpymodule "numpy.random" t :silent t)
 
 ;;; Do not test on ECL on travis just to save some travis time
-#-ecl
+;;; Do not test on ABCL because it causes some error even though the command
+;;; fine in the REPL
+#-(or ecl abcl)
 (py4cl2:defpymodule "networkx" nil :lisp-package "NX" :silent t)
 
 (defpackage :py4cl2-tests

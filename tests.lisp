@@ -819,13 +819,13 @@ a = Test()")
   (let ((object (make-instance 'test-class :thing 23 :value 42)))
     ;; Slot access
     (assert-equalp 23
-        (py4cl2:pycall "lambda x : x.thing" object))
+                   (py4cl2:pycall "lambda x : x.thing" object))
     (assert-equalp 42
-        (py4cl2:chain* object 'value))
+                   (py4cl2:chain* object 'value))
 
     ;; Function (method) call
     (assert-equalp 42
-        (py4cl2:chain* object `(func 21))))
+                   (py4cl2:chain* object `(func 21))))
 
   ;; The handler should work for other objects of the same class (class-of)
   (let ((object2 (make-instance 'test-class :thing "hello" :value 314)))
@@ -847,11 +847,30 @@ a = Test()")
 (deftest lisp-class-inherit (objects) nil
   (let ((object (make-instance 'child-class :thing 23 :value 42 :other 3)))
     (assert-equalp 23
-        (py4cl2:pycall "lambda x : x.thing" object))
+                   (py4cl2:pycall "lambda x : x.thing" object))
     (assert-equalp 42
-        (py4cl2:chain* object 'value))
+                   (py4cl2:chain* object 'value))
     (assert-equalp 3
-        (py4cl2:chain* object 'other))))
+                   (py4cl2:chain* object 'other))))
+
+(defmethod py4cl2:python-setattr ((object test-class) slot-name set-to-value)
+  (cond
+    ((string= slot-name "value")
+     (setf (slot-value object 'value) set-to-value))
+    ((string= slot-name "thing")
+     (setf (slot-value object 'thing) set-to-value))
+    (t (call-next-method))))
+
+(deftest lisp-class-set-slots (objects) nil
+  (let ((object (make-instance 'test-class :thing 23 :value 42)))
+    ;; Set value
+    (py4cl2:pyexec object ".thing = 3")
+    (assert-equalp 3 (slot-value object 'thing))
+    (assert-equalp 3 (py4cl2:pyeval object ".thing"))
+    ;; Set again
+    (setf (py4cl2:chain* object 'thing) 72)
+    (assert-equalp 72 (slot-value object 'thing))
+    (assert-equalp 72 (py4cl2:chain* object 'thing))))
 
 ;; ============================== PICKLE =======================================
 
@@ -864,14 +883,14 @@ a = Test()")
                           (,(* 5 lower-bound)))))
         ;; test transfer to python and back
         (assert-equalp dimensions
-            (mapcar #'array-dimensions
-                    (py4cl2:pyeval
-                     (list (make-array (first dimensions)
-                                       :element-type 'single-float
-                                       :initial-element 0.0)
-                           (make-array (second dimensions)
-                                       :element-type 'single-float
-                                       :initial-element 0.0)))))))))
+                       (mapcar #'array-dimensions
+                               (py4cl2:pyeval
+                                (list (make-array (first dimensions)
+                                                  :element-type 'single-float
+                                                  :initial-element 0.0)
+                                      (make-array (second dimensions)
+                                                  :element-type 'single-float
+                                                  :initial-element 0.0)))))))))
 
 (deftest transfer-without-pickle (pickle) nil
   (unless (and (py4cl2:config-var 'py4cl2:numpy-pickle-location)

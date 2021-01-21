@@ -407,11 +407,17 @@ class Foo:
   def __init__(self):
     self.a = 5
     self.b = 10
-temp = Foo()")
-  (assert-equalp '(5 10)
+  @property
+  def c(self): return self._c
+  @c.setter
+  def c(self, value): self._c = value
+tmp = Foo()")
+  (assert-equalp '(5 10 15)
       (let ((s 'b) (temp (py4cl2:pycall "Foo")))
-        (list (py4cl2:pyslot-value "temp" 'a)
-              (py4cl2:pyslot-value temp s)))))
+        (setf (py4cl2:pyslot-value temp 'c) 15)
+        (list (py4cl2:pyslot-value "tmp" 'a)
+              (py4cl2:pyslot-value temp s)
+              (py4cl2:pyslot-value temp 'c)))))
 
 (deftest pyslot-value-string-as-slot (callpython-utility) nil
   (assert-equalp 5

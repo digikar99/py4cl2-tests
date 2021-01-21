@@ -89,7 +89,8 @@
 ;; would likely fail; in fact, SBCL itself seems to stop
 ;; SBCL can also stop inspite of it being implemented correctly.
 (deftest with-python-output-stress-test (callpython-raw) (:with-python-output)
-  (iter (repeat 10000)
+  (iter (repeat #+(or os-windows windows) 100
+                #-(or os-windows windows) 10000)
     (string= "hello" (with-python-output (pyexec "print('hello', end = '')")))))
 
 (deftest eval-integer (callpython-raw) (:with-python-output)
@@ -124,9 +125,9 @@
 (deftest eval-string-newline (callpython-raw) nil
   (let ((str "hello
 world"))
-    #-windows
+    #-(or :os-windows :windows)
     (assert-equalp str (py4cl2:raw-pyeval (py4cl2::pythonize str)))
-    #+windows
+    #+(or :os-windows :windows)
     (assert-equalp "hello
 world"
         (py4cl2:raw-pyeval (py4cl2::pythonize str))))
@@ -155,6 +156,9 @@ world"
   (assert-equal 3
                 (gethash "pizza"
                          (py4cl2:pyeval "{u'pizza': 3}"))))
+
+(deftest unicode-characters (callpython-raw) nil
+  (assert-equal "Ƃ" (py4cl2:pyeval "'Ƃ'")))
 
 (deftest eval-ratios (callpython-raw) nil
   (assert-equalp 1/2 (py4cl2:pyeval 1/2)) ; round trip
@@ -1082,5 +1086,3 @@ class Foo():
                                                                '(unsigned-byte 16) 0))
                        (list '(unsigned-byte 08) (pyeval-array (list 2 lower-bound)
                                                                '(unsigned-byte 08) 0))))))))
-
-

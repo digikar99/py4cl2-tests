@@ -258,7 +258,14 @@ bar()")
   ;; Ensure keys are being lispified and string keys work
   (let ((table (py4cl2:pyeval "{\"test\":42}")))
     (assert-equalp 42
-                   (gethash "test" table))))
+        (gethash "test" table)))
+
+  ;; Ensure tuple keys and values being lispified and work correctly
+  (let ((table (py4cl2:pyeval "{(1,2):(3,4), (\"hello\",\"world\"):42}")))
+    (assert-equalp '(3 4)
+        (gethash '(1 2) table))
+    (assert-equalp 42
+        (gethash '("hello" "world") table))))
 
 (deftest setf-eval (callpython-utility) nil
   (setf (py4cl2:pyeval "test_value") 42) ; Set a variable

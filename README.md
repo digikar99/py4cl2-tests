@@ -4,12 +4,13 @@
 
 # Running Tests
 
-For running the tests, ensure you use python3 (by configuring `(py4cl2:config-var 'py4cl2:pycmd)`) and have the following installed on the python side:
+For running the tests, ensure you use python3.8 or recent (by configuring `(py4cl2:config-var 'py4cl2:pycmd)`) and have the following installed on the python side:
 
 - numpy
 - networkx
+- matplotlib
 
-The system is configured (in [package.lisp](package.lisp)) to avoid testing the loading of networkx on ECL and ABCL.
+The system is configured (in [package.lisp](package.lisp)) to avoid testing the loading of networkx and matplotlib on ECL and ABCL.
 
 To overcome this behavior, simply remove `:ecl` or `:abcl` from `cl:*features*` during system-read time.
 

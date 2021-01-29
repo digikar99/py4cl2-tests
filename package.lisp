@@ -6,9 +6,11 @@
 
 ;;; Do not test on ECL on travis just to save some travis time
 ;;; Do not test on ABCL because it causes some error even though the command
-;;; fine in the REPL
+;;; works fine in the REPL
 #-(or ecl abcl)
-(py4cl2:defpymodule "networkx" nil :lisp-package "NX" :silent t)
+(progn
+  (py4cl2:defpymodule "networkx" nil :lisp-package "NX" :silent t)
+  (py4cl2:defpymodule "matplotlib.pyplot" nil :lisp-package "PLT" :silent t))
 
 (defpackage :py4cl2-tests
   (:use :cl :clunit :py4cl2 :iterate)

@@ -594,32 +594,38 @@ class testclass:
                      :reload t)
        :stream s)
       (force-output s)
-      (let ((compiled-file-name (compile-file p :print nil :progress nil :verbose nil)))
+      (let ((compiled-file-name (compile-file p :verbose nil)))
         (if (find-package "LA") (delete-package "LA"))
         (load compiled-file-name)
-        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
-            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (assert-equalp
+          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
+          #+ccl (read-from-string "(&KEY :A)")
+          (trivial-arguments:arglist (read-from-string "LA:DET")))
         (eval (read-from-string "(DEFUN LA:DET (A) A)"))
         (assert-equalp (read-from-string "(A)")
             (trivial-arguments:arglist (read-from-string "LA:DET")))
         (load compiled-file-name)
-        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
-        (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (assert-equalp
+          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
+          #+ccl (read-from-string "(&KEY :A)")
+          (trivial-arguments:arglist (read-from-string "LA:DET")))
         (if (find-package "LA") (delete-package "LA"))))))
 
 (deftest reload-nil (import-export) nil
   (with-standard-io-syntax
     (uiop:with-temporary-file (:stream s :pathname p)
       (write
-       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+       `(py4cl2:defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
                      :reload nil)
        :stream s)
       (force-output s)
-      (let ((compiled-file-name (compile-file p :print nil :progress nil :verbose nil)))
+      (let ((compiled-file-name (compile-file p :verbose nil)))
         (if (find-package "LA") (delete-package "LA"))
         (load compiled-file-name)
-        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
-            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (assert-equalp
+          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
+          #+ccl (read-from-string "(&KEY :A)")
+          (trivial-arguments:arglist (read-from-string "LA:DET")))
         (eval (read-from-string "(DEFUN LA:DET (A) A)"))
         (assert-equalp (read-from-string "(A)")
             (trivial-arguments:arglist (read-from-string "LA:DET")))

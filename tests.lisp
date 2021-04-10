@@ -598,16 +598,16 @@ class testclass:
         (if (find-package "LA") (delete-package "LA"))
         (load compiled-file-name)
         (assert-equalp
-          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
           #+ccl (read-from-string "(&KEY :A)")
+          #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
           (trivial-arguments:arglist (read-from-string "LA:DET")))
         (eval (read-from-string "(DEFUN LA:DET (A) A)"))
         (assert-equalp (read-from-string "(A)")
             (trivial-arguments:arglist (read-from-string "LA:DET")))
         (load compiled-file-name)
         (assert-equalp
-          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
           #+ccl (read-from-string "(&KEY :A)")
+          #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
           (trivial-arguments:arglist (read-from-string "LA:DET")))
         (if (find-package "LA") (delete-package "LA"))))))
 
@@ -615,7 +615,7 @@ class testclass:
   (with-standard-io-syntax
     (uiop:with-temporary-file (:stream s :pathname p)
       (write
-       `(py4cl2:defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
                      :reload nil)
        :stream s)
       (force-output s)
@@ -623,8 +623,9 @@ class testclass:
         (if (find-package "LA") (delete-package "LA"))
         (load compiled-file-name)
         (assert-equalp
-          #+sbcl (read-from-string "(&KEY (LA::A 'NIL))")
+          #+ecl :unknown
           #+ccl (read-from-string "(&KEY :A)")
+          #-(or ecl ccl) (read-from-string "(&KEY (LA::A 'NIL))")
           (trivial-arguments:arglist (read-from-string "LA:DET")))
         (eval (read-from-string "(DEFUN LA:DET (A) A)"))
         (assert-equalp (read-from-string "(A)")

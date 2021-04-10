@@ -586,18 +586,60 @@ class testclass:
   ;; py4cl2-tests should not even compile in the case of these bugs.
   (assert-true (numpy.random.mtrand:rand 2)))
 
+(deftest reload-t (import-export) nil
+  (with-standard-io-syntax
+    (uiop:with-temporary-file (:stream s :pathname p)
+      (write
+       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+                     :reload t)
+       :stream s)
+      (force-output s)
+      (let ((compiled-file-name (compile-file p :print nil :progress nil :verbose nil)))
+        (if (find-package "LA") (delete-package "LA"))
+        (load compiled-file-name)
+        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
+            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (eval (read-from-string "(DEFUN LA:DET (A) A)"))
+        (assert-equalp (read-from-string "(A)")
+            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (load compiled-file-name)
+        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
+        (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (if (find-package "LA") (delete-package "LA"))))))
+
+(deftest reload-nil (import-export) nil
+  (with-standard-io-syntax
+    (uiop:with-temporary-file (:stream s :pathname p)
+      (write
+       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+                     :reload nil)
+       :stream s)
+      (force-output s)
+      (let ((compiled-file-name (compile-file p :print nil :progress nil :verbose nil)))
+        (if (find-package "LA") (delete-package "LA"))
+        (load compiled-file-name)
+        (assert-equalp (read-from-string "(&KEY (LA::A 'NIL))")
+            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (eval (read-from-string "(DEFUN LA:DET (A) A)"))
+        (assert-equalp (read-from-string "(A)")
+            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (load compiled-file-name)
+        (assert-equalp (read-from-string "(A)")
+            (trivial-arguments:arglist (read-from-string "LA:DET")))
+        (if (find-package "LA") (delete-package "LA"))))))
+
 ;; more extensive tests for defpyfun and defpymodule are required
 (define-pyfun-with-test defpyfun
     ()
     ((py4cl2:defpyfun "sum" "" :lisp-fun-name "PYSUM")
      (py4cl2:defpyfun "Fraction" "fractions")
      (py4cl2:defpyfun "gcd" "math" :as "g"))
-  (py4cl2:pystop) ; taking "safety" into account
+  (py4cl2:pystop)                       ; taking "safety" into account
   (assert-equalp 1/2 (fraction :numerator 1 :denominator 2))
-  (py4cl2:pystop) ; taking "safety" into account
+  (py4cl2:pystop)                       ; taking "safety" into account
   (assert-equalp 1 (g 5 6))
   (assert-equalp 1 (py4cl2:pycall "g" 5 6)) ; not safe!
-  (py4cl2:pystop) ; taking "safety" into account
+  (py4cl2:pystop)                       ; taking "safety" into account
   (assert-equalp 6 (pysum '(2 1 3))))
 
 (define-pyfun-with-test defpyfun-null

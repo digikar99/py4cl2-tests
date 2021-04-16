@@ -587,53 +587,59 @@ class testclass:
   (assert-true (numpy.random.mtrand:rand 2)))
 
 (deftest reload-t (import-export) nil
-  (with-standard-io-syntax
-    (uiop:with-temporary-file (:stream s :pathname p)
-      (write
-       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
-                     :reload t)
-       :stream s)
-      (force-output s)
-      (let ((compiled-file-name (compile-file p :verbose nil)))
-        (if (find-package "LA") (delete-package "LA"))
-        (load compiled-file-name)
-        (assert-equalp
-          #+ccl (read-from-string "(&KEY :A)")
-          #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
-          (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (eval (read-from-string "(DEFUN LA:DET (A) A)"))
-        (assert-equalp (read-from-string "(A)")
-            (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (load compiled-file-name)
-        (assert-equalp
-          #+ccl (read-from-string "(&KEY :A)")
-          #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
-          (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (if (find-package "LA") (delete-package "LA"))))))
+  (flet ((run-with (&key cache)
+           (with-standard-io-syntax
+             (uiop:with-temporary-file (:stream s :pathname p)
+               (write
+                `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+                              :reload t :cache ,cache)
+                :stream s)
+               (force-output s)
+               (let ((compiled-file-name (compile-file p :verbose nil)))
+                 (if (find-package "LA") (delete-package "LA"))
+                 (load compiled-file-name)
+                 (assert-equalp
+                   #+ccl (read-from-string "(&KEY :A)")
+                   #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
+                   (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (eval (read-from-string "(DEFUN LA:DET (A) A)"))
+                 (assert-equalp (read-from-string "(A)")
+                     (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (load compiled-file-name)
+                 (assert-equalp
+                   #+ccl (read-from-string "(&KEY :A)")
+                   #-ccl (read-from-string "(&KEY (LA::A 'NIL))")
+                   (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (if (find-package "LA") (delete-package "LA")))))))
+    (run-with :cache t)
+    (run-with :cache nil)))
 
 (deftest reload-nil (import-export) nil
-  (with-standard-io-syntax
-    (uiop:with-temporary-file (:stream s :pathname p)
-      (write
-       `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
-                     :reload nil)
-       :stream s)
-      (force-output s)
-      (let ((compiled-file-name (compile-file p :verbose nil)))
-        (if (find-package "LA") (delete-package "LA"))
-        (load compiled-file-name)
-        (assert-equalp
-          #+ecl :unknown
-          #+ccl (read-from-string "(&KEY :A)")
-          #-(or ecl ccl) (read-from-string "(&KEY (LA::A 'NIL))")
-          (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (eval (read-from-string "(DEFUN LA:DET (A) A)"))
-        (assert-equalp (read-from-string "(A)")
-            (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (load compiled-file-name)
-        (assert-equalp (read-from-string "(A)")
-            (trivial-arguments:arglist (read-from-string "LA:DET")))
-        (if (find-package "LA") (delete-package "LA"))))))
+  (flet ((run-with (&key cache)
+           (with-standard-io-syntax
+             (uiop:with-temporary-file (:stream s :pathname p)
+               (write
+                `(defpymodule "numpy.linalg" nil :lisp-package "LA" :silent t
+                              :reload nil)
+                :stream s)
+               (force-output s)
+               (let ((compiled-file-name (compile-file p :verbose nil)))
+                 (if (find-package "LA") (delete-package "LA"))
+                 (load compiled-file-name)
+                 (assert-equalp
+                   #+ecl :unknown
+                   #+ccl (read-from-string "(&KEY :A)")
+                   #-(or ecl ccl) (read-from-string "(&KEY (LA::A 'NIL))")
+                   (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (eval (read-from-string "(DEFUN LA:DET (A) A)"))
+                 (assert-equalp (read-from-string "(A)")
+                     (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (load compiled-file-name)
+                 (assert-equalp (read-from-string "(A)")
+                     (trivial-arguments:arglist (read-from-string "LA:DET")))
+                 (if (find-package "LA") (delete-package "LA")))))))
+    (run-with :cache t)
+    (run-with :cache nil)))
 
 ;; more extensive tests for defpyfun and defpymodule are required
 (define-pyfun-with-test defpyfun

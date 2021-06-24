@@ -676,19 +676,22 @@ class testclass:
 
 (define-pyfun-with-test defpyfun-args
     ((pyexec "def noArgFunc(): return True")
-     (pyexec "def posArgFunc(a, b, c=5, /): return True")
+     (when (< 7 (nth 1 (pyversion-info)))
+       (pyexec "def posArgFunc(a, b, c=5, /): return True"))
      (pyexec "def restArgs(a, b, *args): return True")
      (pyexec "def kwRestArgs(a, b, **kwargs): return True"))
     ((defpyfun "noArgFunc")
-     (defpyfun "posArgFunc")
+     #.(when (< 7 (nth 1 (pyversion-info)))
+         `(defpyfun "posArgFunc"))
      (defpyfun "restArgs")
      (defpyfun "kwRestArgs"))
   (assert-true (eq (if (member :ecl *features*)
                        :unknown nil)
                    (trivial-arguments:arglist #'no-arg-func)))
-  (assert-true
-      (equalp (trivial-arguments:arglist (lambda (a b &optional (c '5))))
-              (trivial-arguments:arglist #'pos-arg-func)))
+  (when (< 7 (nth 1 (pyversion-info)))
+    (assert-true
+        (equalp (trivial-arguments:arglist (lambda (a b &optional (c '5))))
+                (trivial-arguments:arglist #'pos-arg-func))))
   (assert-true
       (equalp (trivial-arguments:arglist (lambda (&rest py4cl2::args) ()))
               (trivial-arguments:arglist #'rest-args)))

@@ -1060,8 +1060,7 @@ class Foo():
 #-(or :ecl :abcl)
 (deftest numcl-array (array-type) nil
   ;; Doesn't really matter if they are numcl-arrays or not
-  (let ((*array-type* :numcl)
-        (*arrayfiers* (append *arrayfiers* (list :numcl #'numcl:asarray))))
+  (with-lispifiers ((cl:array #'numcl:asarray))
     (destructuring-bind (a b) (pyeval "(" #(1 2 3) ", " #2A((1 2 3) (4 5 6)) ")")
       (assert-true (numcl:numcl-array-p a))
       (assert-true (numcl:numcl-array-p b)))))

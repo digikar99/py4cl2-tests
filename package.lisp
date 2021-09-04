@@ -4,7 +4,7 @@
 (py4cl2:defpymodule "numpy" nil :lisp-package "NP" :silent t)
 (py4cl2:defpymodule "numpy.random" t :silent t)
 
-;;; Do not test on ECL on travis just to save some travis time
+;;; Do not test on ECL on CI just to save some travis time
 ;;; Do not test on ABCL because it causes some error even though the command
 ;;; works fine in the REPL
 #-(or ecl abcl)

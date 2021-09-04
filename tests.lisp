@@ -437,6 +437,17 @@ temp = Foo()")
   (assert-equalp 5
       (py4cl2:pyslot-value "temp" "a")))
 
+(deftest pythonizers-and-lispifiers (callpython-utility) nil
+  (pyexec "import decimal")
+  (assert-equalp pi
+      (with-lispifiers ((python-object (lambda (o)
+                                         (if (string= "<class 'decimal.Decimal'>"
+                                                      (print (python-object-type o)))
+                                             (pycall "float" o)
+                                             o))))
+        (with-pythonizers ((real "decimal.Decimal"))
+          (pyeval pi)))))
+
 ;; ========================= CALLPYTHON-CHAIN ==================================
 
 

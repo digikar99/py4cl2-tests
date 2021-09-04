@@ -6,7 +6,7 @@
                          (string #\newline)
                          "py4cl2 maintainer: Shubhamkar Ayare <shubhamayare@yahoo.co.in>")
   :license "MIT"
-  :version "2.8.0"
+  :version "2.9.0"
   :depends-on ("py4cl2"
                #-(or :ecl :abcl)
                "numcl"

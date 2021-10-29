@@ -439,7 +439,7 @@ temp = Foo()")
 
 (deftest pythonizers-and-lispifiers (callpython-utility) nil
   (pyexec "import decimal")
-  (assert-equalp pi
+  (assert-equalp #.(coerce pi 'double-float)
       (with-lispifiers ((python-object (lambda (o)
                                          (if (string= "<class 'decimal.Decimal'>"
                                                       (print (python-object-type o)))

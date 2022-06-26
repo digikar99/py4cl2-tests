@@ -107,6 +107,21 @@
     (assert-true (typep result 'real))
     (assert-equalp 3.5 result)))
 
+(deftest eval-infinity (callpython-raw) nil
+  (py4cl2:raw-pyexec "import numpy as np")
+  (assert-equal float-features:double-float-positive-infinity
+      (py4cl2:raw-pyeval "float('inf')"))
+  (assert-equal float-features:double-float-negative-infinity
+      (py4cl2:raw-pyeval "-float('inf')"))
+  (assert-equal float-features:double-float-positive-infinity
+      (py4cl2:raw-pyeval "np.float64('inf')"))
+  (assert-equal float-features:double-float-negative-infinity
+      (py4cl2:raw-pyeval "-np.float64('inf')"))
+  (assert-equal float-features:single-float-positive-infinity
+      (py4cl2:raw-pyeval "np.float32('inf')"))
+  (assert-equal float-features:single-float-negative-infinity
+      (py4cl2:raw-pyeval "-np.float32('inf')")))
+
 (deftest eval-vector (callpython-raw) nil
   (let ((result (py4cl2:raw-pyeval "[i**2 for i in range(4)]")))
     (assert-true (typep result 'array))

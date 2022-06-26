@@ -142,10 +142,20 @@
     (assert-true (typep result 'cons))
     (assert-equalp '(1 2 3) result)))
 
+(deftest eval-nan (callpython-raw) nil
+  (raw-pyexec "import numpy as np")
+  (assert-equalp float-features:double-float-nan (raw-pyeval "float('nan')"))
+  (assert-equal float-features:single-float-nan (raw-pyeval "np.float32('nan')"))
+  (assert-equal float-features:double-float-nan (raw-pyeval "np.float64('nan')"))
+  (assert-equal float-features:single-float-nan
+      (raw-pyeval (py4cl2:pythonize float-features:single-float-nan)))
+  (assert-equal float-features:double-float-nan
+      (raw-pyeval (py4cl2:pythonize float-features:double-float-nan))))
+
 ;; Check passing strings, including quote characters which need to be escaped
 (deftest eval-string (callpython-raw) nil
   (assert-equalp "say \"hello\" world"
-                 (py4cl2:raw-pyeval "'say \"hello\"' + ' world'")))
+      (py4cl2:raw-pyeval "'say \"hello\"' + ' world'")))
 
 (deftest eval-string-newline (callpython-raw) nil
   (let ((str "hello

@@ -109,6 +109,7 @@
 
 (deftest eval-infinity (callpython-raw) nil
   (py4cl2:raw-pyexec "import numpy as np")
+
   (assert-equal float-features:double-float-positive-infinity
       (py4cl2:raw-pyeval "float('inf')"))
   (assert-equal float-features:double-float-negative-infinity
@@ -120,7 +121,16 @@
   (assert-equal float-features:single-float-positive-infinity
       (py4cl2:raw-pyeval "np.float32('inf')"))
   (assert-equal float-features:single-float-negative-infinity
-      (py4cl2:raw-pyeval "-np.float32('inf')")))
+      (py4cl2:raw-pyeval "-np.float32('inf')"))
+
+  (assert-equal float-features:double-float-positive-infinity
+      (py4cl2:raw-pyeval (py4cl2:pythonize float-features:double-float-positive-infinity)))
+  (assert-equal float-features:double-float-negative-infinity
+      (py4cl2:raw-pyeval (py4cl2:pythonize float-features:double-float-negative-infinity)))
+  (assert-equal float-features:single-float-positive-infinity
+      (py4cl2:raw-pyeval (py4cl2:pythonize float-features:single-float-positive-infinity)))
+  (assert-equal float-features:single-float-negative-infinity
+      (py4cl2:raw-pyeval (py4cl2:pythonize float-features:single-float-negative-infinity))))
 
 (deftest eval-vector (callpython-raw) nil
   (let ((result (py4cl2:raw-pyeval "[i**2 for i in range(4)]")))

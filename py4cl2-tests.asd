@@ -12,6 +12,7 @@
                "numcl"
                "alexandria"
                "clunit"
+               "float-features"
                "trivial-garbage"
                "trivial-arguments")
   :components ((:file "package")

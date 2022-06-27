@@ -144,13 +144,21 @@
 
 (deftest eval-nan (callpython-raw) nil
   (raw-pyexec "import numpy as np")
-  (assert-equalp float-features:double-float-nan (raw-pyeval "float('nan')"))
-  (assert-equal float-features:single-float-nan (raw-pyeval "np.float32('nan')"))
-  (assert-equal float-features:double-float-nan (raw-pyeval "np.float64('nan')"))
-  (assert-equal float-features:single-float-nan
-      (raw-pyeval (py4cl2:pythonize float-features:single-float-nan)))
-  (assert-equal float-features:double-float-nan
-      (raw-pyeval (py4cl2:pythonize float-features:double-float-nan))))
+  (assert-true (let ((value (raw-pyeval "float('nan')")))
+                 (and (typep value 'double-float)
+                      (float-features:float-nan-p value))))
+  (assert-true (let ((value (raw-pyeval "np.float32('nan')")))
+                 (and (typep value 'single-float)
+                      (float-features:float-nan-p value))))
+  (assert-true (let ((value (raw-pyeval "np.float64('nan')")))
+                 (and (typep value 'double-float)
+                      (float-features:float-nan-p value))))
+  (assert-true (let ((value (raw-pyeval (py4cl2:pythonize float-features:single-float-nan))))
+                 (and (typep value 'single-float)
+                      (float-features:float-nan-p value))))
+  (assert-true (let ((value (raw-pyeval (py4cl2:pythonize float-features:double-float-nan))))
+                 (and (typep value 'double-float)
+                      (float-features:float-nan-p value)))))
 
 ;; Check passing strings, including quote characters which need to be escaped
 (deftest eval-string (callpython-raw) nil

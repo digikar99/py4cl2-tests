@@ -9,7 +9,7 @@
   :version "2.9.1"
   :depends-on ("py4cl2"
                #-(or :ecl :abcl)
-               "numcl"
+               "dense-arrays-plus-lite"
                "alexandria"
                "clunit"
                "float-features"

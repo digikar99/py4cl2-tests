@@ -88,14 +88,16 @@
 (deftest multiple-lisp-threads (callpython-raw) ()
   ;; This should not error
   (assert-true
-      (loop :repeat 12
-            :collect
-            (bt:make-thread
-             (lambda ()
-               (loop :repeat 20
-                     :do (py4cl2:raw-pyeval
-                          (format nil "'Hello from lisp thread ' + '~A'"
-                                  (bt:thread-name (bt:current-thread))))))))))
+      (mapcar
+       #'bt:join-thread
+       (loop :repeat 12
+             :collect
+             (bt:make-thread
+              (lambda ()
+                (loop :repeat 20
+                      :do (py4cl2:raw-pyeval
+                           (format nil "'Hello from lisp thread ' + '~A'"
+                                   (bt:thread-name (bt:current-thread)))))))))))
 
 (deftest multiple-python-threads (callpython-raw) ()
   ;; This should not error
@@ -148,13 +150,15 @@ threads = [threading.Thread(
   (sleep 0.1)
 
   (assert-true
-      (loop :for i :below 12 :by 2
-            :collect
-            (bt:make-thread
-             (lambda ()
-               (raw-pyexec
-                (format nil "for th in threads[~D:~D]: th.start()"
-                        i (1+ i))))))))
+      (mapcar #'bt:join-thread
+              (loop :for i :below 12 :by 2
+                    :collect
+                    (bt:make-thread
+                     (lambda ()
+                       (let ((i i))
+                         (raw-pyexec
+                          (format nil "for th in threads[~D:~D]: th.start()"
+                                  i (1+ i))))))))))
 
 
 ;; If locks and synchronization are not implemented properly, this

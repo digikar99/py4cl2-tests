@@ -85,6 +85,78 @@
       (with-python-output
         (py4cl2:raw-pyexec "sys.stdout.write(\"testing\")"))))
 
+(deftest multiple-lisp-threads (callpython-raw) ()
+  ;; This should not error
+  (assert-true
+      (loop :repeat 12
+            :collect
+            (bt:make-thread
+             (lambda ()
+               (loop :repeat 20
+                     :do (py4cl2:raw-pyeval
+                          (format nil "'Hello from lisp thread ' + '~A'"
+                                  (bt:thread-name (bt:current-thread))))))))))
+
+(deftest multiple-python-threads (callpython-raw) ()
+  ;; This should not error
+  (export-function #'identity "identity")
+  (raw-pyexec "
+import threading
+import time
+import sys
+
+def send_sleep_repeat(n, obj):
+  for _ in range(n):
+    identity(obj)
+
+threads = [threading.Thread(
+  target=send_sleep_repeat,
+  args=(20, \"hello from python thread {}\".format(i))
+) for i in range(12)]
+")
+
+  (sleep 0.1)
+
+  (assert-true
+      (progn
+        (raw-pyexec "for th in threads[:6]: th.start()")
+        t))
+
+  (assert-true
+      (progn
+        (raw-pyexec "for th in threads[6:]: th.start()")
+        t)))
+
+(deftest multiple-lisp-python-threads (callpython-raw) ()
+  ;; This should not error
+  (export-function #'identity "identity")
+  (raw-pyexec "
+import threading
+import time
+import sys
+
+def send_sleep_repeat(n, obj):
+  for _ in range(n):
+    identity(obj)
+
+threads = [threading.Thread(
+  target=send_sleep_repeat,
+  args=(20, \"hello from python thread {}\".format(i))
+) for i in range(12)]
+")
+
+  (sleep 0.1)
+
+  (assert-true
+      (loop :for i :below 12 :by 2
+            :collect
+            (bt:make-thread
+             (lambda ()
+               (raw-pyexec
+                (format nil "for th in threads[~D:~D]: th.start()"
+                        i (1+ i))))))))
+
+
 ;; If locks and synchronization are not implemented properly, this
 ;; would likely fail; in fact, SBCL itself seems to stop
 ;; SBCL can also stop inspite of it being implemented correctly.

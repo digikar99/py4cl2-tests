@@ -153,11 +153,11 @@ threads = [threading.Thread(
       (mapcar #'bt:join-thread
               (loop :for i :below 12 :by 2
                     :collect
-                    (bt:make-thread
-                     (lambda ()
-                       (let ((i i))
+                    (let ((i i))
+                      (bt:make-thread
+                       (lambda ()
                          (raw-pyexec
-                          (format nil "for th in threads[~D:~D]: th.start()"
+                          (format nil "for th in threads[~D:1 + ~D]: th.start()"
                                   i (1+ i))))))))))
 
 
